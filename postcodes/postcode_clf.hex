@@ -1,0 +1,20 @@
+digit(0). digit(1). digit(2). digit(3). digit(4). digit(5). digit(6). digit(7). digit(8). digit(9).
+
+patterns(Pat) :- pattern(Pat,_,_,_).
+patterns(Pat) :- pattern(_,Pat,_,_).
+patterns(Pat) :- pattern(_,_,Pat,_).
+patterns(Pat) :- pattern(_,_,_,Pat).
+
+patterns_prob(Pat,Dig,Prob) :- patterns(Pat), &prob_dist[Pat](Dig,Prob), digit(Dig).
+
+postcode_prob(PC,Prob) :- postcode(PC,D1,D2,D3,D4), pattern(Pat1,Pat2,Pat3,Pat4),
+                          patterns_prob(Pat1,D1,P1), patterns_prob(Pat2,D2,P2),
+                          patterns_prob(Pat3,D3,P3), patterns_prob(Pat4,D4,P4),
+                          Y1 = P1 + P2, Y2 = Y1 + P3, Y3 = Y2 + P4, Prob = Y3 / 4.
+
+higher(PC) :- postcode(PC,_,_,_,_), postcode(X,_,_,_,_), PC != X, postcode_prob(PC,Y1), postcode_prob(X,Y2), Y2 > Y1.
+
+highest(PC,Y) :- postcode(PC,_,_,_,_), postcode_prob(PC,Y), not higher(PC).
+
+
+

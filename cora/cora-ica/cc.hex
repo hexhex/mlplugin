@@ -1,0 +1,32 @@
+
+class(1).
+class(2).
+class(3).
+class(4).
+class(5).
+class(6).
+class(0).
+
+topic(P,T) :-
+	paper(P),
+	neighbor_count1(P,N1),
+	neighbor_count2(P,N2),
+	neighbor_count3(P,N3),
+	neighbor_count4(P,N4),
+	neighbor_count5(P,N5),
+	neighbor_count6(P,N6),
+	neighbor_count7(P,N7),
+	&predict[P,N1,N2,N3,N4,N5,N6,N7](T), class(T).
+
+
+neighbors(P1,P2) :- cites(P1,P2).
+neighbors(P1,P2) :- cites(P2,P1).
+
+
+neighbor_count1(P1,N1) :- #count{P2 : topic(P2,1), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count2(P1,N1) :- #count{P2 : topic(P2,2), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count3(P1,N1) :- #count{P2 : topic(P2,3), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count4(P1,N1) :- #count{P2 : topic(P2,4), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count5(P1,N1) :- #count{P2 : topic(P2,5), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count6(P1,N1) :- #count{P2 : topic(P2,6), neighbors(P1,P2), paper(P2)} = N1, paper(P1).
+neighbor_count7(P1,N1) :- #count{P2 : topic(P2,7), neighbors(P1,P2), paper(P2)} = N1, paper(P1).

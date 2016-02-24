@@ -1,0 +1,51 @@
+digit(0). digit(1). digit(2). digit(3). digit(4). digit(5). digit(6). digit(7). digit(8). digit(9).
+
+% input pattern:
+pattern(420,421,423,424).
+
+% known post codes:
+plz(a,1,2,3,4).
+plz(b,1,2,0,0).
+plz(c,1,0,6,0).
+plz(d,5,5,6,5).
+
+% get digits:
+digit1(X,Y) :- plz(X,Y,_,_,_).
+digit2(X,Y) :- plz(X,_,Y,_,_).
+digit3(X,Y) :- plz(X,_,_,Y,_).
+digit4(X,Y) :- plz(X,_,_,_,Y).
+
+pattern1(Y) :- pattern(Y,_,_,_).
+pattern2(Y) :- pattern(_,Y,_,_).
+pattern3(Y) :- pattern(_,_,Y,_).
+pattern4(Y) :- pattern(_,_,_,Y).
+
+options1(X) :- digit1(Y,X),
+           solution_digit2(A), digit2(Y,A),
+           solution_digit3(B), digit3(Y,B),
+           solution_digit4(C), digit4(Y,C).
+
+options2(X) :- solution_digit1(A), digit1(Y,A),
+           digit2(Y,X),
+           solution_digit3(B), digit3(Y,B),
+           solution_digit4(C), digit4(Y,C).
+
+options3(X) :- solution_digit1(A), digit1(Y,A),
+           solution_digit2(B), digit2(Y,B),
+           digit3(Y,X),
+           solution_digit4(C), digit4(Y,C).
+
+options4(X) :- solution_digit1(A), digit1(Y,A),
+           solution_digit2(B), digit2(Y,B),
+           solution_digit3(C), digit3(Y,C),
+           digit4(Y,X).
+
+options1(X) v n_options1(X) :- digit(X).
+options2(X) v n_options1(X) :- digit(X).
+options3(X) v n_options1(X) :- digit(X).
+options4(X) v n_options1(X) :- digit(X).
+
+solution_digit1(X) :- &predict[options1,Y](X), digit(X), pattern1(Y).
+solution_digit2(X) :- &predict[options2,Y](X), digit(X), pattern2(Y).
+solution_digit3(X) :- &predict[options3,Y](X), digit(X), pattern3(Y).
+solution_digit4(X) :- &predict[options4,Y](X), digit(X), pattern4(Y).

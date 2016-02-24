@@ -1,0 +1,10 @@
+postcode(0,0,2,0,0).
+postcode(1,3,2,6,6).
+postcode(2,5,2,5,2).
+postcode(3,3,7,3,9).
+postcode(4,9,6,1,7).
+postcode(5,4,8,6,1).
+postcode(6,6,0,6,9).
+postcode(7,7,1,9,2).
+postcode(8,6,8,6,3).
+postcode(9,4,9,6,4).
