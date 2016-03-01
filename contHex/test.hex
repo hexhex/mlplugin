@@ -1,0 +1,1 @@
+test(X,Y) :- &predict["classifier.pkl","feature_1",void,void](X,Y).
