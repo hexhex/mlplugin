@@ -1,0 +1,25 @@
+% assign exactly one label that is not filtered to each object based on the ranking:
+
+ranking(X,L,Y,Rank) :- object(X), &ranking["model.pkl",X,25](Y,Rank), label(Y,L).
+
+better_label(X,L1) :- ranking(X,L1,_,Rank1), ranking(X,_,Y,Rank2), not filter(X,Y), Rank2 > Rank1.
+
+assigned_label(X,L) :- ranking(X,L,Y,R), not better_label(X,L), not filter(X,Y).
+
+assigned(X) :- assigned_label(X,_).
+:- object(X), not assigned(X).
+
+
+% if there is a monitor there is at least one keyboard (soft constraint)
+
+{associated(X,Y) : object(Y)} >= 1 :- has_keyboard(X).
+
+:- associated(X1,Y), associated(X2,Y), X1 != X2.
+
+filter(Y,X) :- associated(_,Y), label(X,L), L != keyboard.
+
+has_keyboard(X) :- assigned_label(X,monitor), not n_has_keyboard(X).
+n_has_keyboard(X) :- assigned_label(X,monitor), not has_keyboard(X).
+
+:~ n_has_keyboard(X), assigned_label(X,monitor). [1@1,X]
+
