@@ -6,6 +6,7 @@ import inputbox
 import cv2
 import numpy as np
 import os
+import shutil
 
 pygame.init()
 
@@ -95,6 +96,13 @@ def mainLoop(scr, px):
 def segment_and_label(state):
     global name_num
     global name_dict
+
+    shutil.rmtree('temp/' + state + '/objects/')
+    os.makedirs('temp/' + state + '/objects/')
+
+    file = open('temp/' + state + '/objects/polygons.tmp', 'w')
+
+
     for item in os.listdir('scenes/training/'):
         if item[-4:] == ".jpg":
             input_path = 'scenes/training/' + item
@@ -111,7 +119,11 @@ def segment_and_label(state):
                 if n < len(polygons):
                     mask = np.zeros(image.shape, dtype=np.uint8)
 
-                    output_path = 'temp/' + state + '/objects/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + names[n-1] + '.jpg'
+                    output_path = 'temp/' + state + '/objects/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg'
+                    file.write(str((item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg',poly[0])))
+                    file.write('\n')
+	
+                    print poly[0]
                     roi_corners = np.array([poly[0]], dtype=np.int32)
 
                     channel_count = image.shape[2]
@@ -121,7 +133,8 @@ def segment_and_label(state):
                     
                     masked_image = cv2.bitwise_and(image, mask)
                     masked_image = masked_image[poly[2][1]:poly[2][3], poly[2][0]:poly[2][2]]
-                    cv2.imwrite(output_path,masked_image)                    
+                    cv2.imwrite(output_path,masked_image)          
+    file.close()          
 
 
 
