@@ -1,6 +1,6 @@
 % assign exactly one label to each object with functional external atom:
 
-assigned_label(X,L) :- object(X), &predict["model.pkl",X,filter,25](Y), label(Y,L).
+assigned_label(X,L) :- object(X), &predict["temp/test/model.pkl",X,filter,20](Y), label(Y,L).
 
 assigned(X) :- assigned_label(X,_).
 :- object(X), not assigned(X).

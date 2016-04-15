@@ -9,7 +9,10 @@ import warnings
 import lib.label_objects as lo
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
-lo.segment_and_label('training')
+segment = raw_input("Segment and label scenes (y/n)? ")
+
+if segment == "y":
+	lo.segment_and_label('training')
 
 k = 250
 
@@ -20,10 +23,13 @@ sift_descriptors = []
 labels = []
 
 for item in os.listdir('temp/training/objects/'):
-	image = cv2.imread('temp/training/objects/' +  item)
-	keypoints, descriptors = sift.detectAndCompute(image, None)
-	sift_descriptors[len(sift_descriptors):] = descriptors
-	labels[len(labels):] = [[int(item.split('-')[2]),len(descriptors)]]
+	if item[-4:] == ".jpg":
+		print item
+		image = cv2.imread('temp/training/objects/' +  item)
+		keypoints, descriptors = sift.detectAndCompute(image, None)
+		if descriptors != None:
+			sift_descriptors[len(sift_descriptors):] = descriptors
+			labels[len(labels):] = [[int(item.split('-')[2]),len(descriptors)]]
 
 
 k_means = MiniBatchKMeans(n_clusters=k)

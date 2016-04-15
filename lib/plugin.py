@@ -1,9 +1,11 @@
 import dlvhex
 import json
 from sklearn.externals import joblib
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def predict(classifier,object,filter,threshold):
-	f = open("scene/"+object.value().strip('"'), 'r')
+	f = open("temp/test/testscene/"+object.value().strip('"'), 'r')
 	X_test = json.load(f)
 	f.close()
 	model = joblib.load(classifier.value().strip('"'))

@@ -4,6 +4,12 @@ import os, sys
 
 paths = ['scenes/training/','scenes/test/']
 
+def rename():
+    for path in paths:
+        images = os.listdir(path)[:]
+        for item in images:
+            os.rename(path+item,path+'c'+item)
+
 def resize():
     for path in paths:
         n = 0
@@ -16,4 +22,5 @@ def resize():
                 os.remove(path+item)
                 n += 1
 
+rename()
 resize()

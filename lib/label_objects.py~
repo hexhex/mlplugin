@@ -7,11 +7,13 @@ import cv2
 import numpy as np
 import os
 import shutil
+from sklearn.externals import joblib
 
 pygame.init()
 
 name_num = 0
 name_dict = dict()
+name_list = []
 
 def displayImage(scr, px, polygons, names, show):
     elemnum = 0
@@ -75,16 +77,20 @@ def mainLoop(scr, px):
                 names.append(name)
                 displayImage(scr, px, polygons, names, True)
                 pointlist = []
-                polygons.append([pointlist,(random.randint(0,255),random.randint(0,255),random.randint(0,255)),0])
+                polygons.append([pointlist,(random.randint(0,128),random.randint(128,255),random.randint(0,255)),0])
             if event.type == pygame.KEYDOWN:
                 if event.key == 8:
                     if len(polygons) > 1:
                         polygons.pop()
                         polygons.pop()
                         names.pop()
+
+                        repair_name_dict(names)                        
+        
                         pointlist = []
                         polygons.append([pointlist,(random.randint(0,255),random.randint(0,255),random.randint(0,255)),0])
                         displayImage(scr, px, polygons, names, True)
+                        print name_dict
                 if event.key == 110:
                     n = 1
         if [pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1]] != mouse_position:
@@ -93,22 +99,39 @@ def mainLoop(scr, px):
     return (polygons, names)
 
 
+def repair_name_dict(names):
+    global name_num
+    global name_dict
+    global name_list
+
+    name_dict_vals = name_dict.keys()
+
+    for name in name_dict_vals:
+        if name not in names and name not in name_list:
+            name_dict.pop(name, None)
+            name_num -= 1
+
+
 def segment_and_label(state):
     global name_num
     global name_dict
+    global name_list
 
-    shutil.rmtree('temp/' + state + '/objects/')
+    if state == "test":
+        name_dict, name_num, name_list = joblib.load("temp/labels.pkl")
+
+    if os.path.exists('temp/' + state + '/objects/'):
+        shutil.rmtree('temp/' + state + '/objects/')
     os.makedirs('temp/' + state + '/objects/')
 
-    file = open('temp/' + state + '/objects/polygons.tmp', 'w')
-
-
-    for item in os.listdir('scenes/training/'):
+    for item in os.listdir('scenes/' + state + '/'):
+        os.makedirs('temp/' + state + '/objects/' + item[:-4] + '/')
         if item[-4:] == ".jpg":
-            input_path = 'scenes/training/' + item
+            input_path = 'scenes/' + state + '/' + item
 
             scr, px = setup(input_path)
             polygons, names = mainLoop(scr, px)
+            name_list += names
 
             image = cv2.imread(input_path, -1)
             
@@ -119,10 +142,8 @@ def segment_and_label(state):
                 if n < len(polygons):
                     mask = np.zeros(image.shape, dtype=np.uint8)
 
-                    output_path = 'temp/' + state + '/objects/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg'
-                    file.write(str((item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg',poly[0])))
+                    output_path = 'temp/' + state + '/objects/' + item[:-4] + '/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg'
 	
-                    print poly[0]
                     roi_corners = np.array([poly[0]], dtype=np.int32)
 
                     channel_count = image.shape[2]
@@ -132,8 +153,12 @@ def segment_and_label(state):
                     
                     masked_image = cv2.bitwise_and(image, mask)
                     masked_image = masked_image[poly[2][1]:poly[2][3], poly[2][0]:poly[2][2]]
-                    cv2.imwrite(output_path,masked_image)          
-    file.close()          
+                    cv2.imwrite(output_path,masked_image)
+
+            joblib.dump((polygons), 'temp/' + state + '/objects/' + item[:-4] + '.pkl', compress=1)             
+
+    if state == "training":
+        joblib.dump((name_dict, name_num, name_list), "temp/labels.pkl", compress=1)     
 
 
 
