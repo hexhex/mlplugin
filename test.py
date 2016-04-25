@@ -26,9 +26,7 @@ joblib.dump(model, "temp/test/model.pkl", compress=1)
 
 
 
-name_dict, name_num, name_list = joblib.load("temp/labels.pkl")
-
-label_names = {v: k for k, v in name_dict.items()}
+label_list = joblib.load("temp/labels.pkl")
 
 for directory in next(os.walk('temp/test/objects'))[1]:
 	sift = cv2.xfeatures2d.SIFT_create()
@@ -84,22 +82,22 @@ for directory in next(os.walk('temp/test/objects'))[1]:
 			file.write(str(x.tolist()))
 			file.close()
 			
-			object_labels[labels[i][2]] = label_names[labels[i][0]]
+			object_labels[labels[i][2]] = label_list[labels[i][0]]
 
 			scene_file.write('object("object' + str(labels[i][2]) + '").\n')
 			
-			print "Ground truth: " + label_names[labels[i][0]]
+			print "Ground truth: " + label_list[labels[i][0]]
 
-			print "Prediction:   " + label_names[model.predict(x)[0]]
+			print "Prediction:   " + label_list[model.predict(x)[0]]
 			i += 1
 			n = 0
 			for prob in model.predict_proba(x)[0]:
-				print str(prob)[:8] + "\t: " + label_names[n]
+				print str(prob)[:8] + "\t: " + label_list[n]
 				n += 1
 			print ''
 
-		for label in label_names:
-			scene_file.write('label(' + str(label) + ',' + label_names[label] + ').\n')
+		for label in label_list:
+			scene_file.write('label(' + str(label_list.index(label)) + ',' + label + ').\n')
 
 		scene_file.close()
 		FNULL = open(os.devnull, 'w')

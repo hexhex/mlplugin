@@ -14,20 +14,28 @@ pygame.init()
 def setup(path,polygons,names,scene):
     elemnum = 0
     px = pygame.image.load(path)
+    srf = pygame.Surface(px.get_rect()[2:])
+    srf.set_alpha(128)
+    srf.set_colorkey((0,0,0))
+
+    tsrf = pygame.Surface(px.get_rect()[2:])
+    tsrf.set_colorkey((0,0,0))
 
     for (poly,color,bounds) in polygons:
         elemnum += 1
 
         if len(poly) > 0:
-            polyRect = pygame.draw.polygon(px, color, poly, 0)
+            polyRect = pygame.draw.polygon(srf, color, poly, 0)
 
             font = pygame.font.Font(None, 24)
             if len(names) > elemnum-1:   
-                text = font.render(names[elemnum-1], 1, pygame.Color(0, 0, 0, 255))
+                text = font.render(names[elemnum-1], 1, pygame.Color(255, 255, 255, 255))
                 textpos = text.get_rect()
                 textpos.centerx = polyRect.left + (polyRect.right-polyRect.left)/2
                 textpos.centery = polyRect.bottom + (polyRect.top-polyRect.bottom)/2
-                px.blit(text, textpos)
+                tsrf.blit(text, textpos)
+    px.blit(srf,(0,0))
+    px.blit(tsrf,(0,0))
     pygame.image.save(px,'results/' + scene + '.jpg')
 
 

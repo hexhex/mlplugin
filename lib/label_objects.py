@@ -11,10 +11,7 @@ from sklearn.externals import joblib
 
 pygame.init()
 
-name_num = 0
-name_dict = dict()
-name_list = []
-colors = [(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191),(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191),(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191),(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191),(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191)]
+colors = [(255, 0, 0),(255, 255, 0),(0, 255, 0),(0, 255, 255),(0, 0, 255),(255, 0, 255),(255, 0, 0),(255, 191, 0),(64, 255, 0),(0, 255, 191),(0, 64, 255),(191, 0, 255),(255, 0, 64),(128, 255, 0),(255, 128, 0),(0, 255, 128),(0, 128, 255),(128, 0, 255),(255, 0, 128),(0, 255, 64),(255, 64, 0),(191, 255, 0),(0, 191, 255),(64, 0, 255),(255, 0, 191)]
 
 def displayImage(scr, px, polygons, names, show):
     elemnum = 0
@@ -54,18 +51,22 @@ def setup(path):
     pygame.display.flip()
     return scr, px
 
-
-def mainLoop(scr, px):
-    global name_num
-    global name_dict
+def get_color():
     global colors
+    color = colors.pop()
+    colors.insert(0,color)
+    return color
+
+def mainLoop(scr, px, label_list):
     names = []
     polygons = []
     pointlist = []
-    polygons.append([pointlist,colors.pop(),0])
+
+    polygons.append([pointlist,get_color(),0])
 
     mouse_position = [pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1]]
     n=0
+    end=False
     while n!=1:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
@@ -73,94 +74,80 @@ def mainLoop(scr, px):
             if event.type == pygame.MOUSEBUTTONUP and event.button == 3:
                 displayImage(scr, px, polygons, names, False)
                 name = inputbox.ask(scr, 'Label')
-                if name not in name_dict:
-                    name_dict[name] = name_num
-                    name_num += 1
+                while name not in label_list:
+                    name = inputbox.ask(scr, 'Label')
                 names.append(name)
                 displayImage(scr, px, polygons, names, True)
                 pointlist = []
-                polygons.append([pointlist,colors.pop(),0])
+                polygons.append([pointlist,get_color(),0])
             if event.type == pygame.KEYDOWN:
                 if event.key == 8:
                     if len(polygons) > 1:
                         polygons.pop()
                         polygons.pop()
-                        names.pop()
-
-                        repair_name_dict(names)                        
-        
+                        names.pop()        
                         pointlist = []
-                        polygons.append([pointlist,colors.pop(),0])
+                        polygons.append([pointlist,get_color(),0])
                         displayImage(scr, px, polygons, names, True)
-                        print name_dict
+                if event.key == 27:
+                    n = 1
+                    end = True
                 if event.key == 110:
                     n = 1
         if [pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1]] != mouse_position:
             displayImage(scr, px, polygons, names, True)
             mouse_position = [pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1]]
-    return (polygons, names)
-
-
-def repair_name_dict(names):
-    global name_num
-    global name_dict
-    global name_list
-
-    name_dict_vals = name_dict.keys()
-
-    for name in name_dict_vals:
-        if name not in names and name not in name_list:
-            name_dict.pop(name, None)
-            name_num -= 1
+    return (polygons, names, end)
 
 
 def segment_and_label(state):
-    global name_num
-    global name_dict
-    global name_list
+    if not os.path.exists('temp/'):
+        os.makedirs('temp/')
 
-    if state == "test":
-        name_dict, name_num, name_list = joblib.load("temp/labels.pkl")
+    if not os.path.exists('temp/labels.pkl'):
+        labels = raw_input("Comma-separated list of labels: ") 
+        label_list = labels.split(",")
+        joblib.dump(label_list, "temp/labels.pkl", compress=1)
+    else:
+        label_list = joblib.load("temp/labels.pkl")
 
-    if os.path.exists('temp/' + state + '/objects/'):
-        shutil.rmtree('temp/' + state + '/objects/')
-    os.makedirs('temp/' + state + '/objects/')
+    if not os.path.exists('temp/' + state + '/objects/'):
+        os.makedirs('temp/' + state + '/objects/')
+
+    end = False    
 
     for item in os.listdir('scenes/' + state + '/'):
-        os.makedirs('temp/' + state + '/objects/' + item[:-4] + '/')
-        if item[-4:] == ".jpg":
-            input_path = 'scenes/' + state + '/' + item
 
-            scr, px = setup(input_path)
-            polygons, names = mainLoop(scr, px)
-            name_list += names
+        if not os.path.exists('temp/' + state + '/objects/' + item[:-4] + '/') and not end:
+            os.makedirs('temp/' + state + '/objects/' + item[:-4] + '/')
+            if item[-4:] == ".jpg":
+                input_path = 'scenes/' + state + '/' + item
 
-            image = cv2.imread(input_path, -1)
-            
-            n = 0        
+                scr, px = setup(input_path)
+                polygons, names, end = mainLoop(scr, px, label_list)
 
-            for poly in polygons:
-                n += 1
-                if n < len(polygons):
-                    mask = np.zeros(image.shape, dtype=np.uint8)
+                image = cv2.imread(input_path, -1)
+                
+                n = 0        
 
-                    output_path = 'temp/' + state + '/objects/' + item[:-4] + '/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(name_dict[names[n-1]]).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg'
+                for poly in polygons:
+                    n += 1
+                    if n < len(polygons):
+                        mask = np.zeros(image.shape, dtype=np.uint8)
+
+                        output_path = 'temp/' + state + '/objects/' + item[:-4] + '/' + item[:-4] + '-' + str(n).zfill(3) + '-' + str(label_list.index(names[n-1])).zfill(3) + '-' + str(names[n-1]) + '-(' + str(poly[2][1]) + '-' + str(poly[2][3]) + '-' + str(poly[2][0]) + '-' + str(poly[2][2]) + ').jpg'
 	
-                    roi_corners = np.array([poly[0]], dtype=np.int32)
+                        roi_corners = np.array([poly[0]], dtype=np.int32)
 
-                    channel_count = image.shape[2]
-                    ignore_mask_color = (255,)*channel_count
-                    cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+                        channel_count = image.shape[2]
+                        ignore_mask_color = (255,)*channel_count
+                        cv2.fillPoly(mask, roi_corners, ignore_mask_color)
 
-                    
-                    masked_image = cv2.bitwise_and(image, mask)
-                    masked_image = masked_image[poly[2][1]:poly[2][3], poly[2][0]:poly[2][2]]
-                    cv2.imwrite(output_path,masked_image)
+                        masked_image = cv2.bitwise_and(image, mask)
+                        masked_image = masked_image[poly[2][1]:poly[2][3], poly[2][0]:poly[2][2]]
+                        cv2.imwrite(output_path,masked_image)
 
-            joblib.dump((polygons), 'temp/' + state + '/objects/' + item[:-4] + '.pkl', compress=1)             
-
-    if state == "training":
-        joblib.dump((name_dict, name_num, name_list), "temp/labels.pkl", compress=1)     
+                joblib.dump((polygons), 'temp/' + state + '/objects/' + item[:-4] + '.pkl', compress=1)
 
 
 

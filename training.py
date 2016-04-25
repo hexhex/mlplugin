@@ -7,7 +7,8 @@ import os
 import numpy as np
 import warnings
 import lib.label_objects as lo
-warnings.filterwarnings("ignore", category=DeprecationWarning) 
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning) 
 
 segment = raw_input("Segment and label scenes (y/n)? ")
 
@@ -18,18 +19,18 @@ k = 250
 
 sift = cv2.xfeatures2d.SIFT_create()
 
-
 sift_descriptors = []
 labels = []
 
-for item in os.listdir('temp/training/objects/'):
-	if item[-4:] == ".jpg":
-		print item
-		image = cv2.imread('temp/training/objects/' +  item)
-		keypoints, descriptors = sift.detectAndCompute(image, None)
-		if descriptors != None:
-			sift_descriptors[len(sift_descriptors):] = descriptors
-			labels[len(labels):] = [[int(item.split('-')[2]),len(descriptors)]]
+for directory in next(os.walk('temp/training/objects'))[1]:
+	for item in os.listdir('temp/training/objects/' + directory + '/'):
+		if item[-4:] == ".jpg":
+			print item
+			image = cv2.imread('temp/training/objects/' + directory + '/' +  item)
+			keypoints, descriptors = sift.detectAndCompute(image, None)
+			if descriptors != None:
+				sift_descriptors[len(sift_descriptors):] = descriptors
+				labels[len(labels):] = [[int(item.split('-')[2]),len(descriptors)]]
 
 
 k_means = MiniBatchKMeans(n_clusters=k)
