@@ -48,8 +48,8 @@ def visualize(predictions,scene):
 
     for pred in sorted_predictions:
         names.append(pred[1])
-	polygons = joblib.load('temp/test/objects/' + scene + '.pkl')
-	setup('scenes/test/' + scene + '.jpg',polygons,names,scene)
+    polygons = joblib.load('temp/test/objects/' + scene + '.pkl')
+    setup('scenes/test/' + scene + '.jpg',polygons,names,scene)
 
 
 

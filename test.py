@@ -43,6 +43,8 @@ for directory in next(os.walk('temp/test/objects'))[1]:
 			if descriptors != None:
 				sift_descriptors[len(sift_descriptors):] = descriptors
 				labels[len(labels):] = [[int(item.split('-')[2]),len(descriptors),int(item.split('-')[1])]]
+			else:
+				print "object too small"
 
 
 	if not empty:
