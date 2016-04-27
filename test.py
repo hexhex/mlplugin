@@ -4,6 +4,8 @@ from sklearn.cluster import KMeans
 from sklearn.externals import joblib
 from sklearn import preprocessing
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 import os
 import numpy as np
 import warnings
@@ -14,6 +16,32 @@ import lib.label_objects as lo
 import lib.visualization as vz
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 warnings.filterwarnings("ignore", category=FutureWarning) 
+
+
+def print_cm(cm, labels, hide_zeroes=False, hide_diagonal=False, hide_threshold=None):
+    """pretty print for confusion matrixes"""
+    columnwidth = max([len(x) for x in labels]+[5]) # 5 is value length
+    empty_cell = " " * columnwidth
+    # Print header
+    print "    " + empty_cell,
+    for label in labels: 
+        print "%{0}s".format(columnwidth) % label,
+    print
+    # Print rows
+    for i, label1 in enumerate(labels):
+        print "    %{0}s".format(columnwidth) % label1,
+        for j in range(len(labels)): 
+            cell = "%{0}.f".format(columnwidth) % cm[i, j]
+            if hide_zeroes:
+                cell = cell if float(cm[i, j]) != 0 else empty_cell
+            if hide_diagonal:
+                cell = cell if i != j else empty_cell
+            if hide_threshold:
+                cell = cell if cm[i, j] > hide_threshold else empty_cell
+            print cell,
+        print
+
+
 
 segment = raw_input("Segment and label scenes (y/n)? ")
 
@@ -27,6 +55,9 @@ joblib.dump(model, "temp/test/model.pkl", compress=1)
 
 
 label_list = joblib.load("temp/labels.pkl")
+
+all_y_pred = []
+all_y_true = []
 
 for directory in next(os.walk('temp/test/objects'))[1]:
 	sift = cv2.xfeatures2d.SIFT_create()
@@ -73,11 +104,14 @@ for directory in next(os.walk('temp/test/objects'))[1]:
 		os.makedirs('temp/test/testscene/')
 
 		scene_file = open('temp/test/testscene/scene.hex', 'w')
+		scene_file.write('scene("' + directory + '").\n')
 
 		#print np.array(labels)[:,0]
 		i = 0
 
 		object_labels = dict()
+
+		print labels
 
 		for x in X:
 			file = open('temp/test/testscene/object' + str(labels[i][2]), 'w')
@@ -112,6 +146,20 @@ for directory in next(os.walk('temp/test/objects'))[1]:
 		for (obj,pred) in predictions:
 			y_pred.append(pred)
 			y_true.append(object_labels[int(obj)])
+
+		all_y_pred += y_pred
+		all_y_true += y_true
+
 		print 'Accuracy: ' + str(accuracy_score(y_true, y_pred)) + '\n'
 
 		vz.visualize(predictions,directory)
+
+print 'Overall Accuracy: ' + str(accuracy_score(all_y_true, all_y_pred)) + '\n'
+print classification_report(all_y_true, all_y_pred)
+
+labelss = label_list
+cm = confusion_matrix(all_y_pred, all_y_true, labelss)
+
+# then print it in a pretty way
+print_cm(cm, labelss)
+

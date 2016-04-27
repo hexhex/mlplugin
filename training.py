@@ -15,7 +15,7 @@ segment = raw_input("Segment and label scenes (y/n)? ")
 if segment == "y":
 	lo.segment_and_label('training')
 
-k = 250
+k = 300
 
 sift = cv2.xfeatures2d.SIFT_create()
 

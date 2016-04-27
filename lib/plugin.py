@@ -18,10 +18,15 @@ def predict(classifier,object,filter,threshold):
 	threshold_val = float(threshold.value())/100
 
 	filter_list = []
+	non_filter_list = []
 
 	for x in dlvhex.getInputAtoms():
 		if x.tuple()[0] == filter and x.isTrue() and x.tuple()[1].value() == object.value():
+			print "yes"
 			filter_list.append(int(x.tuple()[2].value()))
+		if x.tuple()[0] == filter and x.isFalse() and x.tuple()[1].value() == object.value():
+			print "yes2"
+			non_filter_list.append(int(x.tuple()[2].value()))
 
 	for prob, label in zip(prob_dist.tolist(),model.classes_):
 		if label in filter_list or prob < threshold_val:
@@ -32,13 +37,20 @@ def predict(classifier,object,filter,threshold):
 	cur_label = ""
 	cur_prob = 0
 
+	unknown_labels = []    
+
 	for key, value in prob_dict.iteritems():
 		if value > cur_prob:
 			cur_prob = value
 			cur_label = key
+		if value != 0:
+			unknown_labels.append(key)
 
-	if cur_label != "":
+	if cur_label != "" and cur_label in non_filter_list:
 		dlvhex.output((cur_label,))
+	else:
+		for unknown_label in unknown_labels:
+			dlvhex.outputUnknown((unknown_label,))
 
 
 def ranking(classifier,object,threshold):
@@ -64,14 +76,22 @@ def ranking(classifier,object,threshold):
 		if prob >= threshold_val:
 			dlvhex.output((label,rank))
 			rank += 1
-		
+
+def spatial(object1,object2,scene,slack):
+    polygons = joblib.load('temp/test/objects/' + scene.value().strip('"') + '.pkl')
+
+    if polygons[int(object1.value().strip('"')[6:])-1][2][0] - int(slack.value()) < polygons[int(object2.value().strip('"')[6:])-1][2][0] and \
+            polygons[int(object1.value().strip('"')[6:])-1][2][1] - int(slack.value()) < polygons[int(object2.value().strip('"')[6:])-1][2][1] and \
+            polygons[int(object1.value().strip('"')[6:])-1][2][2] + int(slack.value()) > polygons[int(object2.value().strip('"')[6:])-1][2][2] and \
+            polygons[int(object1.value().strip('"')[6:])-1][2][3] + int(slack.value()) > polygons[int(object2.value().strip('"')[6:])-1][2][3]:
+        dlvhex.output(("contains",))
+            
 
 def register():
-    prop = dlvhex.ExtSourceProperties()
-    prop.setFunctional(True)
-    dlvhex.addAtom("predict", (dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.PREDICATE, dlvhex.CONSTANT), 1, prop)
-    dlvhex.addAtom("ranking", (dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.CONSTANT), 2)
-
-
-
+	prop = dlvhex.ExtSourceProperties()
+	prop.setFunctional(True)
+	prop.setProvidesPartialAnswer(True)
+	dlvhex.addAtom("predict", (dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.PREDICATE, dlvhex.CONSTANT), 1, prop)
+	dlvhex.addAtom("ranking", (dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.CONSTANT), 2)
+	dlvhex.addAtom("spatial", (dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.CONSTANT, dlvhex.CONSTANT), 1)
 
