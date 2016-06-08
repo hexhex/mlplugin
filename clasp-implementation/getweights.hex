@@ -1,0 +1,19 @@
+%%% IMPORT FROM SPATIAL MODULE %%%
+
+contains(X1,X2) :- &spatial[S,5,training](contains,X1,X2), scene(S).
+contains_bottom(X1,X2) :- &spatial[S,5,training](contains_bottom,X1,X2), scene(S).
+higher(X1,X2) :- &spatial[S,0,training](higher,X1,X2), scene(S).
+
+
+%%% IMPORT FROM ONTOLOGY %%%
+
+small_object(L) :- &cDL["ontology.owl",a,b,c,d,"SmallObject"](X), label_string(X,L).
+large_object(L) :- &cDL["ontology.owl",a,b,c,d,"LargeObject"](X), label_string(X,L).
+midsized_object(L) :- &cDL["ontology.owl",a,b,c,d,"MidsizedObject"](X), label_string(X,L).
+car_part(L) :- &cDL["ontology.owl",a,b,c,d,"CarPart"](X), label_string(X,L).
+
+
+
+
+
+
