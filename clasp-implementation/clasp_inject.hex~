@@ -1,0 +1,21 @@
+% import labels with ranks for each object
+
+label_prob(X,L,P) :- object(X), &predictProb["temp/test/model.pkl",X,0,99,logprob,t](Y,P), label(Y,L).
+
+%%% IMPORT FROM SPATIAL MODULE %%%
+
+contains(X1,X2) :- &spatial[S,5,test](contains,X1,X2), scene(S).
+contains_bottom(X1,X2) :- &spatial[S,5,test](contains_bottom,X1,X2), scene(S).
+higher(X1,X2) :- &spatial[S,0,test](higher,X1,X2), scene(S).
+
+
+%%% IMPORT FROM ONTOLOGY %%%
+
+small_object(L) :- &cDL["ontology.owl",a,b,c,d,"SmallObject"](X), label_string(X,L).
+large_object(L) :- &cDL["ontology.owl",a,b,c,d,"LargeObject"](X), label_string(X,L).
+midsized_object(L) :- &cDL["ontology.owl",a,b,c,d,"MidsizedObject"](X), label_string(X,L).
+car_part(L) :- &cDL["ontology.owl",a,b,c,d,"CarPart"](X), label_string(X,L).
+
+
+
+
